@@ -1,0 +1,13 @@
+node_modules/
+.env
+.DS_Store
+dist/
+build/
+coverage/
+.expo/
+*.log
+backend_js
+mobile_js
+
+.pnpm-cache/
+.npm-cache/
