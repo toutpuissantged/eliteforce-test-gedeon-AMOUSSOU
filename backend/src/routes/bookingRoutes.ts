@@ -19,7 +19,7 @@ router.post(
   [
     body('serviceId').isNumeric().withMessage('Service ID must be a number'),
     body('scheduledAt').isISO8601().withMessage('Scheduled At must be a valid ISO 8601 date'),
-    body('address').trim().notEmpty().withMessage('Address is required'),
+    body('address').trim().escape().notEmpty().withMessage('Address is required'),
   ],
   validateRequest,
   createBooking

@@ -9,8 +9,8 @@ const router = express.Router();
 router.post(
   '/register',
   [
-    body('firstName').trim().notEmpty().withMessage('First name is required'),
-    body('lastName').trim().notEmpty().withMessage('Last name is required'),
+    body('firstName').trim().escape().notEmpty().withMessage('First name is required'),
+    body('lastName').trim().escape().notEmpty().withMessage('Last name is required'),
     body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
     body('password').notEmpty().withMessage('Password is required'),
     body('confirmPassword').custom((value, { req }) => {
