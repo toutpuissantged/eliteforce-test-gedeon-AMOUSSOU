@@ -49,8 +49,13 @@ export const useNotifications = (isAuthenticated: boolean) => {
         });
 
         return () => {
-            Notifications.removeNotificationSubscription(notificationListener.current);
-            Notifications.removeNotificationSubscription(responseListener.current);
+            // Correct way to remove subscriptions in newer Expo SDK versions
+            if (notificationListener.current) {
+                notificationListener.current.remove();
+            }
+            if (responseListener.current) {
+                responseListener.current.remove();
+            }
         };
     }, [isAuthenticated, dispatch, showModal]);
 };
