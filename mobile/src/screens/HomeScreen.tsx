@@ -9,7 +9,8 @@ import {
     Image,
     SafeAreaView,
     Dimensions,
-    RefreshControl
+    RefreshControl,
+    Platform
 } from 'react-native';
 import { 
     Notification, 
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingTop: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
     },
     userContainer: {
         flexDirection: 'row',

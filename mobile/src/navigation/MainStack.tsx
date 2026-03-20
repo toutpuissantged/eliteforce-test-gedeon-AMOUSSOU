@@ -16,7 +16,7 @@ export default function MainStack() {
             <Stack.Screen
                 name="Payment"
                 component={PaymentScreen}
-                options={{ headerShown: true, title: 'Paiement' }}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="ServiceDetail"
@@ -26,7 +26,7 @@ export default function MainStack() {
             <Stack.Screen
                 name="Tracking"
                 component={TrackingScreen}
-                options={{ headerShown: true, title: 'Suivi Prestataire' }}
+                options={{ headerShown: false }}
             />
             <Stack.Screen
                 name="Notifications"

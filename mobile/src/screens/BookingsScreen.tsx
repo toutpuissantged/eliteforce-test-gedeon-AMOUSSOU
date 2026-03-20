@@ -8,7 +8,8 @@ import {
     SafeAreaView,
     Image,
     RefreshControl,
-    Dimensions
+    Dimensions,
+    Platform
 } from 'react-native';
 import { 
     Calendar, 
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 24,
-        paddingTop: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
         paddingBottom: 24,
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.border,

@@ -229,7 +229,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
+        paddingBottom: 16,
     },
     iconBtn: {
         width: 48,
