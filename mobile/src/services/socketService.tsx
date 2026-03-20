@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useAppSelector } from '../hooks/store';
+import { useAppSelector, useAppDispatch } from '../hooks/store';
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_URL } from '../config';
 import { useModal } from './modalService';
+import { addNotification } from '../store/notificationSlice';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -24,6 +25,7 @@ interface SocketProviderProps {
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const dispatch = useAppDispatch();
   const { token, isAuthenticated } = useAppSelector((state) => state.auth);
   const { showModal } = useModal();
 
@@ -49,9 +51,20 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       });
 
       newSocket.on('mission-completed', (data: { bookingId: number | string }) => {
+        const title = 'Mission terminée';
+        const body = `La mission pour la réservation #${data.bookingId} est terminée. N'oubliez pas de noter votre prestataire !`;
+        
+        // Add to notification history
+        dispatch(addNotification({
+            id: `socket-${Date.now()}`,
+            title,
+            body,
+            data: data
+        }));
+
         showModal({
-          title: 'Mission terminée',
-          message: `La mission pour la réservation #${data.bookingId} est terminée. N'oubliez pas de noter votre prestataire !`,
+          title,
+          message: body,
           type: 'success'
         });
       });
@@ -64,7 +77,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         newSocket.disconnect();
       }
     };
-  }, [isAuthenticated, token, SOCKET_URL, showModal]);
+  }, [isAuthenticated, token, SOCKET_URL, showModal, dispatch]);
 
   const joinBookingRoom = (bookingId: number | string) => {
     if (socket) {

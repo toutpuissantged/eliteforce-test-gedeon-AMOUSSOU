@@ -79,6 +79,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     const dispatch = useAppDispatch();
     const { list, loading } = useAppSelector((state) => state.services);
     const { user } = useAppSelector((state) => state.auth);
+    const { unreadCount } = useAppSelector((state) => state.notifications);
     const [searchQuery, setSearchQuery] = useState('');
     const [refreshing, setRefreshing] = useState(false);
 
@@ -123,8 +124,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                             <Text style={styles.userName}>{user?.firstName || 'Utilisateur'}</Text>
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.iconBtn}>
+                    <TouchableOpacity 
+                        style={styles.iconBtn}
+                        onPress={() => navigation.navigate('Notifications')}
+                    >
                         <Notification size={24} color={theme.colors.text.primary} variant="Outline" />
+                        {unreadCount > 0 && (
+                            <View style={styles.notificationDot}>
+                                <Text style={styles.dotText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
 
@@ -271,6 +280,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: theme.colors.border,
+    },
+    notificationDot: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: theme.colors.primary,
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+    dotText: {
+        color: '#fff',
+        fontSize: 9,
+        fontWeight: '800',
     },
     titleSection: {
         paddingHorizontal: 24,

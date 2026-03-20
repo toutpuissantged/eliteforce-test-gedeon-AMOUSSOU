@@ -18,4 +18,5 @@ export type MainStackParamList = {
     ServiceDetail: { serviceId: number };
     Payment: { bookingId: number; amount: number; serviceName: string };
     Tracking: { bookingId: number };
+    Notifications: undefined;
 };

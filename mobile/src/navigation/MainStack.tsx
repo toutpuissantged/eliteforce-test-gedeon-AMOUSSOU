@@ -5,6 +5,7 @@ import BottomTabs from './BottomTabs';
 import PaymentScreen from '../screens/PaymentScreen';
 import ServiceDetailScreen from '../screens/ServiceDetailScreen';
 import TrackingScreen from '../screens/TrackingScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createStackNavigator<MainStackParamList>();
 
@@ -26,6 +27,11 @@ export default function MainStack() {
                 name="Tracking"
                 component={TrackingScreen}
                 options={{ headerShown: true, title: 'Suivi Prestataire' }}
+            />
+            <Stack.Screen
+                name="Notifications"
+                component={NotificationsScreen}
+                options={{ headerShown: false }}
             />
         </Stack.Navigator>
     );

@@ -27,7 +27,7 @@ export async function registerForPushNotificationsAsync() {
                 return undefined;
             }
             token = (await Notifications.getExpoPushTokenAsync({
-                projectId: 'eliteforce-test',
+                projectId: '9639677e-ca64-470c-b907-5763db22c8c0',
             })).data;
         } catch (error) {
             console.log('Error getting push token. Push notifications may not work:', error);
