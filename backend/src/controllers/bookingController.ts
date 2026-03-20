@@ -37,8 +37,17 @@ const createBooking = async (req: Request, res: Response, next: NextFunction) =>
       },
       include: {
         service: true,
+        user: true
       }
     });
+
+    if (booking.user?.pushToken) {
+      await sendPushNotification(
+        booking.user.pushToken,
+        'Réservation enregistrée',
+        `Votre réservation pour ${service.name} a été créée. En attente de paiement.`
+      );
+    }
 
     res.status(201).json(booking);
   } catch (error) {
