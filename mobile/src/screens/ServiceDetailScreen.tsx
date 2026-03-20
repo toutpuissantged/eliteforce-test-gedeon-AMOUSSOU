@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     Image,
     SafeAreaView,
-    Dimensions,
     ActivityIndicator,
     TextInput,
     Platform
@@ -24,15 +23,13 @@ import {
 import { theme } from '../theme';
 import { StackScreenProps } from '@react-navigation/stack';
 import { MainStackParamList } from '../types/navigation';
-import { useAppDispatch, useAppSelector } from '../hooks/store';
-import { fetchServiceById } from '../store/servicesSlice';
-import { createBooking } from '../store/bookingSlice';
+import { useServices } from '../hooks/useServices';
+import { useBookings } from '../hooks/useBookings';
 import { useModal } from '../services/modalService';
 import Skeleton from '../components/Skeleton';
+import { createBooking } from '../store/bookingSlice';
 
 type Props = StackScreenProps<MainStackParamList, 'ServiceDetail'>;
-
-const { width } = Dimensions.get('window');
 
 const DetailSkeleton = () => (
     <View style={styles.container}>
@@ -60,11 +57,11 @@ const DetailSkeleton = () => (
 
 const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     const { serviceId } = route.params;
-    const dispatch = useAppDispatch();
+    const { services, loading: servicesLoading, loadServiceById } = useServices();
+    const { loading: bookingLoading, makeBooking } = useBookings();
     const { showModal } = useModal();
-    const { list: services, loading: servicesLoading } = useAppSelector((state) => state.services);
+    
     const service = services.find(s => s.id === serviceId);
-    const { loading: bookingLoading } = useAppSelector((state) => state.bookings);
 
     const [address, setAddress] = useState('');
     const tomorrow = new Date();
@@ -73,9 +70,9 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
     useEffect(() => {
         if (!service) {
-            dispatch(fetchServiceById(serviceId));
+            loadServiceById(serviceId);
         }
-    }, [dispatch, serviceId, service]);
+    }, [serviceId, service, loadServiceById]);
 
     const handleBooking = async () => {
         if (!address) {
@@ -87,11 +84,11 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
             return;
         }
 
-        const resultAction = await dispatch(createBooking({
+        const resultAction: any = await makeBooking({
             serviceId,
             scheduledAt,
             address,
-        }));
+        });
 
         if (createBooking.fulfilled.match(resultAction)) {
             const newBooking = resultAction.payload;

@@ -29,8 +29,8 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { StackScreenProps } from '@react-navigation/stack';
 import { BottomTabParamList, MainStackParamList } from '../types/navigation';
-import { useAppDispatch, useAppSelector } from '../hooks/store';
-import { setServicesFilters, fetchServices } from '../store/servicesSlice';
+import { useAppSelector } from '../hooks/store';
+import { useServices } from '../hooks/useServices';
 import Skeleton from '../components/Skeleton';
 
 type Props = CompositeScreenProps<
@@ -63,7 +63,7 @@ const HomeSkeleton = () => (
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuredList}>
             {[1, 2, 3].map((i) => (
-                <View key={i} style={[styles.featuredCard, { borderWeight: 0 }]}>
+                <View key={i} style={[styles.featuredCard, { borderWidth: 0 }]}>
                     <Skeleton height={140} borderRadius={0} />
                     <View style={{ padding: 16 }}>
                         <Skeleton width="40%" height={12} style={{ marginBottom: 8 }} />
@@ -77,30 +77,26 @@ const HomeSkeleton = () => (
 );
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-    const dispatch = useAppDispatch();
-    const { list, loading } = useAppSelector((state) => state.services);
     const { user } = useAppSelector((state) => state.auth);
     const { unreadCount } = useAppSelector((state) => state.notifications);
+    const { services, loading, loadServices, updateFilters } = useServices();
+    
     const [searchQuery, setSearchQuery] = useState('');
     const [refreshing, setRefreshing] = useState(false);
 
-    const loadData = async () => {
-        await dispatch(fetchServices({}));
-    };
-
     useEffect(() => {
-        loadData();
-    }, [dispatch]);
+        loadServices();
+    }, [loadServices]);
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await loadData();
+        await loadServices();
         setRefreshing(false);
     };
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
-            dispatch(setServicesFilters({ search: searchQuery }));
+            updateFilters({ search: searchQuery });
             navigation.navigate('Search');
         }
     };
@@ -177,7 +173,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                                     key={category.id}
                                     style={styles.categoryItem}
                                     onPress={() => {
-                                        dispatch(setServicesFilters({ category: category.name }));
+                                        updateFilters({ category: category.name });
                                         navigation.navigate('Search');
                                     }}
                                 >
@@ -203,7 +199,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.featuredList}
                         >
-                            {list.map((item) => (
+                            {services.map((item) => (
                                 <TouchableOpacity
                                     key={item.id}
                                     style={styles.featuredCard}

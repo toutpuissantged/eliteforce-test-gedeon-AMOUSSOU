@@ -22,8 +22,7 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { StackScreenProps } from '@react-navigation/stack';
 import { BottomTabParamList, MainStackParamList } from '../types/navigation';
-import { useAppDispatch, useAppSelector } from '../hooks/store';
-import { fetchMyBookings } from '../store/bookingSlice';
+import { useBookings } from '../hooks/useBookings';
 import { BookingStatus } from '../types';
 import Skeleton from '../components/Skeleton';
 
@@ -58,17 +57,16 @@ const BookingsSkeleton = () => (
 );
 
 const BookingsScreen: React.FC<Props> = ({ navigation }) => {
-    const dispatch = useAppDispatch();
-    const { list: bookings, loading } = useAppSelector((state) => state.bookings);
+    const { bookings, loading, loadMyBookings } = useBookings();
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchMyBookings());
-    }, [dispatch]);
+        loadMyBookings();
+    }, [loadMyBookings]);
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await dispatch(fetchMyBookings());
+        await loadMyBookings();
         setRefreshing(false);
     };
 
@@ -294,6 +292,11 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: theme.colors.primary,
         marginRight: 4,
+    },
+    loader: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     emptyState: {
         flex: 1,

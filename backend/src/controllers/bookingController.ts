@@ -1,78 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { sendPushNotification } from '../utils/notifications';
-
-const prisma = new PrismaClient();
+import { BookingService } from '../services/bookingService';
 
 const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { serviceId, scheduledAt, address } = req.body;
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
-    }
-
-    const service = await prisma.service.findUnique({
-      where: { id: parseInt(serviceId) }
-    });
-
-    if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
-    }
-
-    if (!service.available) {
-      return res.status(400).json({ message: 'Service is currently not available' });
-    }
-
-    const totalPrice = service.basePrice; // Simplified pricing logic, could add extras later
-
-    const booking = await prisma.booking.create({
-      data: {
-        userId,
-        serviceId: service.id,
-        scheduledAt: new Date(scheduledAt),
-        address,
-        totalPrice,
-      },
-      include: {
-        service: true,
-        user: true
-      }
-    });
-
-    if (booking.user?.pushToken) {
-      await sendPushNotification(
-        booking.user.pushToken,
-        'Réservation enregistrée',
-        `Votre réservation pour ${service.name} a été créée. En attente de paiement.`
-      );
-    }
-
+    const booking = await BookingService.createBooking(req.user!.id, req.body);
     res.status(201).json(booking);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'SERVICE_NOT_FOUND') {
+      return res.status(404).json({ message: 'Service non trouvé' });
+    }
+    if (error.message === 'SERVICE_NOT_AVAILABLE') {
+      return res.status(400).json({ message: 'Service non disponible' });
+    }
     next(error);
   }
 };
 
 const getMyBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
-    }
-
-    const bookings = await prisma.booking.findMany({
-      where: { userId },
-      include: {
-        service: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      }
-    });
-
+    const bookings = await BookingService.getMyBookings(req.user!.id);
     res.json(bookings);
   } catch (error) {
     next(error);
@@ -81,60 +27,25 @@ const getMyBookings = async (req: Request, res: Response, next: NextFunction) =>
 
 const cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id as string;
-    const userId = req.user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
+    const booking = await BookingService.cancelBooking(parseInt(req.params.id), req.user!.id);
+    res.json(booking);
+  } catch (error: any) {
+    if (error.message === 'BOOKING_NOT_FOUND') {
+      return res.status(404).json({ message: 'Réservation non trouvée' });
     }
-
-    const booking = await prisma.booking.findUnique({
-      where: { id: parseInt(id) },
-    });
-
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+    if (error.message === 'UNAUTHORIZED_ACCESS') {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
-
-    if (booking.userId !== userId) {
-      return res.status(403).json({ message: 'Access denied: You do not own this booking' });
+    if (error.message === 'CANNOT_CANCEL_NON_PENDING_BOOKING') {
+      return res.status(400).json({ message: 'Seules les réservations en attente peuvent être annulées' });
     }
-
-    if (booking.status !== 'PENDING') {
-      return res.status(400).json({ message: 'Only PENDING bookings can be cancelled' });
-    }
-
-    const cancelledBooking = await prisma.booking.update({
-      where: { id: parseInt(id) },
-      data: { status: 'CANCELLED' },
-      include: { service: true }
-    });
-
-    res.json(cancelledBooking);
-  } catch (error) {
     next(error);
   }
 };
 
 const getAllBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bookings = await prisma.booking.findMany({
-      include: {
-        service: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc',
-      }
-    });
-
+    const bookings = await BookingService.getAllBookings();
     res.json(bookings);
   } catch (error) {
     next(error);
@@ -143,33 +54,7 @@ const getAllBookings = async (req: Request, res: Response, next: NextFunction) =
 
 const updateBookingStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id as string;
-    const { status } = req.body;
-
-    const booking = await prisma.booking.update({
-      where: { id: parseInt(id) },
-      data: { status },
-      include: { user: true, service: true }
-    });
-
-    if (booking.user?.pushToken) {
-      let title = 'Mise à jour de réservation';
-      let body = `Le statut de votre réservation pour ${booking.service.name} a changé.`;
-
-      if (status === 'IN_PROGRESS') {
-        title = 'Prestataire en route';
-        body = `Votre prestataire pour ${booking.service.name} est en route !`;
-      } else if (status === 'COMPLETED') {
-        title = 'Mission terminée';
-        body = `La mission pour ${booking.service.name} a été marquée comme terminée.`;
-      } else if (status === 'CANCELLED') {
-        title = 'Réservation annulée';
-        body = `Votre réservation pour ${booking.service.name} a été annulée.`;
-      }
-
-      await sendPushNotification(booking.user.pushToken, title, body);
-    }
-
+    const booking = await BookingService.updateBookingStatus(parseInt(req.params.id), req.body.status);
     res.json(booking);
   } catch (error) {
     next(error);

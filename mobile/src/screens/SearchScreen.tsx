@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Slider from '@react-native-community/slider';
 import {
     View,
@@ -24,8 +24,7 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { StackScreenProps } from '@react-navigation/stack';
 import { BottomTabParamList, MainStackParamList } from '../types/navigation';
-import { useAppDispatch, useAppSelector } from '../hooks/store';
-import { setServicesFilters, fetchServices } from '../store/servicesSlice';
+import { useServices } from '../hooks/useServices';
 import Skeleton from '../components/Skeleton';
 
 type Props = CompositeScreenProps<
@@ -51,8 +50,7 @@ const SearchSkeleton = () => (
 );
 
 const SearchScreen: React.FC<Props> = ({ navigation }) => {
-    const dispatch = useAppDispatch();
-    const { list, loading, filters } = useAppSelector((state) => state.services);
+    const { services, loading, filters, loadServices, updateFilters } = useServices();
     const [searchQuery, setSearchQuery] = useState(filters.search);
     const [priceRange, setPriceRange] = useState(filters.maxPrice || 1000);
     const [rating, setRating] = useState(filters.rating || 0);
@@ -61,24 +59,20 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            dispatch(setServicesFilters({ search: searchQuery }));
+            updateFilters({ search: searchQuery });
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, dispatch]);
-
-    const loadServices = useCallback(async () => {
-        await dispatch(fetchServices(filters));
-        setRefreshing(false);
-    }, [dispatch, filters]);
+    }, [searchQuery, updateFilters]);
 
     useEffect(() => {
         loadServices();
     }, [loadServices]);
 
-    const onRefresh = () => {
+    const onRefresh = async () => {
         setRefreshing(true);
-        loadServices();
+        await loadServices();
+        setRefreshing(false);
     };
 
     return (
@@ -114,7 +108,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                             value={priceRange}
                             onSlidingComplete={(value: number) => {
                                 setPriceRange(value);
-                                dispatch(setServicesFilters({ maxPrice: value }));
+                                updateFilters({ maxPrice: value });
                             }}
                             minimumTrackTintColor={theme.colors.primary}
                             maximumTrackTintColor={theme.colors.border}
@@ -131,7 +125,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                                     onPress={() => {
                                         const newRating = rating === star ? 0 : star;
                                         setRating(newRating);
-                                        dispatch(setServicesFilters({ rating: newRating }));
+                                        updateFilters({ rating: newRating });
                                     }}
                                     style={styles.starTouch}
                                 >
@@ -159,7 +153,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                                 styles.categoryChip,
                                 (filters.category === item || (item === 'All' && !filters.category)) && styles.categoryChipSelected
                             ]}
-                            onPress={() => dispatch(setServicesFilters({ category: item === 'All' ? '' : item }))}
+                            onPress={() => updateFilters({ category: item === 'All' ? '' : item })}
                         >
                             <Text style={[
                                 styles.categoryText,
@@ -176,7 +170,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                 <SearchSkeleton />
             ) : (
                 <FlatList
-                    data={list}
+                    data={services}
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.resultsList}
                     showsVerticalScrollIndicator={false}

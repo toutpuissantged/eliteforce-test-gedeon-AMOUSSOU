@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
-import { sendPushNotification } from '../utils/notifications';
+import { NotificationService } from '../services/notificationService';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-02-24-preview' as any, // Use latest or specific
+  apiVersion: '2025-02-24-preview' as any,
 });
 
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ const createPaymentIntent = async (req: Request, res: Response, next: NextFuncti
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: 'User not authenticated' });
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
     }
 
     const booking = await prisma.booking.findUnique({
@@ -24,28 +24,25 @@ const createPaymentIntent = async (req: Request, res: Response, next: NextFuncti
     });
 
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: 'Réservation non trouvée' });
     }
 
     if (booking.userId !== userId) {
-      return res.status(403).json({ message: 'Access denied: You do not own this booking' });
+      return res.status(403).json({ message: 'Accès refusé' });
     }
 
     if (booking.status !== 'PENDING') {
-      return res.status(400).json({ message: 'Only PENDING bookings can be paid for' });
+      return res.status(400).json({ message: 'Paiement déjà effectué ou réservation annulée' });
     }
 
-    // Amount should be in cents (e.g., multiplied by 100) for currency like MAD or EUR
-    // Assuming basePrice is in the primary unit (e.g., Dirhams)
     const amountInCents = Math.round(booking.totalPrice * 100);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
-      currency: 'mad', // Assuming Moroccan Dirham for this test, change if needed
+      currency: 'mad',
       metadata: { bookingId: booking.id.toString(), userId: userId.toString() },
     });
 
-    // Save the Stripe payment ID to the booking
     await prisma.booking.update({
       where: { id: booking.id },
       data: { stripePaymentId: paymentIntent.id }
@@ -67,14 +64,12 @@ const handleWebhook = async (req: Request, res: Response, next: NextFunction) =>
   let event: Stripe.Event;
 
   try {
-    // req.body should be raw buffer here
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   if (event.type === 'payment_intent.succeeded') {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
 
@@ -84,10 +79,9 @@ const handleWebhook = async (req: Request, res: Response, next: NextFunction) =>
         data: { status: 'CONFIRMED', paidAt: new Date() },
         include: { user: true, service: true }
       });
-      console.log(`Booking with PaymentIntent ${paymentIntent.id} confirmed.`);
 
       if (booking.user?.pushToken) {
-        await sendPushNotification(
+        await NotificationService.sendPushNotification(
           booking.user.pushToken,
           'Paiement Confirmé',
           `Votre paiement pour ${booking.service.name} a été validé !`
@@ -99,7 +93,6 @@ const handleWebhook = async (req: Request, res: Response, next: NextFunction) =>
     }
   }
 
-  // Return a 200 response to acknowledge receipt of the event
   res.send();
 };
 
