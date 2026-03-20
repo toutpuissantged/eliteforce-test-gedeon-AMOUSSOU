@@ -6,6 +6,7 @@ import {
     FlatList,
     TouchableOpacity,
     SafeAreaView,
+    Platform
 } from 'react-native';
 import { 
     ArrowLeft, 
@@ -96,7 +97,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
+        paddingBottom: 16,
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.border,
     },

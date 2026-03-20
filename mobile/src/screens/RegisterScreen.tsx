@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F9FAFB',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 12,
+        marginTop: Platform.OS === 'android' ? 44 : 12,
         borderWidth: 1,
         borderColor: theme.colors.border,
     },

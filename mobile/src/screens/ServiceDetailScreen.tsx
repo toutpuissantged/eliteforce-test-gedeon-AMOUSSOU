@@ -9,7 +9,8 @@ import {
     SafeAreaView,
     Dimensions,
     ActivityIndicator,
-    TextInput
+    TextInput,
+    Platform
 } from 'react-native';
 import { 
     ArrowLeft, 
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     },
     backBtn: {
         position: 'absolute',
-        top: 24,
+        top: Platform.OS === 'android' ? 44 : 24,
         left: 24,
         width: 48,
         height: 48,

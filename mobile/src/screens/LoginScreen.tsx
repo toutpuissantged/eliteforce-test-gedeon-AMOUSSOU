@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: 'center',
-        marginTop: 80,
+        marginTop: Platform.OS === 'android' ? 100 : 80,
         marginBottom: 48,
     },
     logoContainer: {

@@ -7,7 +7,8 @@ import {
     Image,
     ScrollView,
     SafeAreaView,
-    Dimensions
+    Dimensions,
+    Platform
 } from 'react-native';
 import { 
     User, 
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     header: {
         alignItems: 'center',
         paddingVertical: 40,
+        paddingTop: Platform.OS === 'android' ? 60 : 40,
         backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.border,

@@ -9,6 +9,7 @@ import {
     ScrollView,
     Dimensions,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { 
@@ -249,7 +250,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingVertical: 16,
+        paddingTop: Platform.OS === 'android' ? 40 : 16,
+        paddingBottom: 16,
         borderBottomWidth: 1,
         borderBottomColor: theme.colors.border,
     },

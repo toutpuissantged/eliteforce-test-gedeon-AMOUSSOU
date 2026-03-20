@@ -8,7 +8,8 @@ import {
     TouchableOpacity,
     Image,
     TextInput,
-    SafeAreaView
+    SafeAreaView,
+    Platform
 } from 'react-native';
 import { 
     SearchNormal1, 
