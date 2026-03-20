@@ -8,7 +8,6 @@ import {
     Image,
     SafeAreaView,
     ActivityIndicator,
-    TextInput,
     Platform
 } from 'react-native';
 import { 
@@ -17,7 +16,6 @@ import {
     Clock, 
     ShieldTick, 
     Money,
-    Location,
     CalendarTick
 } from 'iconsax-react-native';
 import { theme } from '../theme';
@@ -27,6 +25,7 @@ import { useServices } from '../hooks/useServices';
 import { useBookings } from '../hooks/useBookings';
 import { useModal } from '../services/modalService';
 import Skeleton from '../components/Skeleton';
+import AddressAutocomplete from '../components/AddressAutocomplete';
 import { createBooking } from '../store/bookingSlice';
 
 type Props = StackScreenProps<MainStackParamList, 'ServiceDetail'>;
@@ -169,17 +168,11 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
                     </Text>
 
                     <Text style={styles.sectionTitle}>Adresse d'intervention</Text>
-                    <View style={styles.inputWrapper}>
-                        <Location size={20} color={theme.colors.text.muted} style={styles.inputIcon} variant="Outline" />
-                        <TextInput
-                            style={styles.addressInput}
-                            placeholder="Adresse de l'intervention"
-                            placeholderTextColor={theme.colors.text.muted}
-                            value={address}
-                            onChangeText={setAddress}
-                            multiline
-                        />
-                    </View>
+                    <AddressAutocomplete 
+                        value={address}
+                        onChangeText={setAddress}
+                        placeholder="Rechercher l'adresse de l'intervention"
+                    />
 
                     <Text style={styles.sectionTitle}>Date prévue</Text>
                     <View style={styles.dateBox}>
@@ -331,42 +324,6 @@ const styles = StyleSheet.create({
         color: theme.colors.text.secondary,
         lineHeight: 24,
         marginBottom: 24,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        backgroundColor: '#F9FAFB',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-        paddingHorizontal: 16,
-        alignItems: 'flex-start',
-        paddingVertical: 12,
-    },
-    inputIcon: {
-        marginTop: 4,
-    },
-    addressInput: {
-        flex: 1,
-        marginLeft: 12,
-        fontSize: 15,
-        color: theme.colors.text.primary,
-        minHeight: 80,
-        textAlignVertical: 'top',
-    },
-    dateBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F9FAFB',
-        padding: 20,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
-    },
-    dateText: {
-        marginLeft: 12,
-        fontSize: 15,
-        color: theme.colors.text.primary,
-        fontWeight: '600',
     },
     footer: {
         position: 'absolute',
