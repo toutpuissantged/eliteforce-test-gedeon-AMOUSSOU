@@ -10,16 +10,17 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  firstName String
-  lastName  String
-  phone     String?
-  pushToken String?
-  role       Role     @default(CLIENT)
-  createdAt DateTime  @default(now())
-  bookings  Booking[]
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
+  password         String
+  firstName        String
+  lastName         String
+  phone            String?
+  pushToken        String?
+  role             Role      @default(CLIENT)
+  createdAt        DateTime  @default(now())
+  bookings         Booking[] @relation("UserBookings")
+  providerBookings Booking[] @relation("ProviderBookings")
 }
 
 model Service {
@@ -38,6 +39,7 @@ model Service {
 model Booking {
   id              Int           @id @default(autoincrement())
   userId          Int
+  providerId      Int?
   serviceId       Int
   status          BookingStatus @default(PENDING)
   scheduledAt     DateTime
@@ -46,7 +48,8 @@ model Booking {
   stripePaymentId String?       @unique
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
-  user            User          @relation(fields: [userId], references: [id])
+  user            User          @relation("UserBookings", fields: [userId], references: [id])
+  provider        User?         @relation("ProviderBookings", fields: [providerId], references: [id])
   service         Service       @relation(fields: [serviceId], references: [id])
 }
 

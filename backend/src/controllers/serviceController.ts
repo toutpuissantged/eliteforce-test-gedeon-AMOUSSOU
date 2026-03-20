@@ -12,7 +12,7 @@ const getAllServices = async (req: Request, res: Response, next: NextFunction) =
 
 const getServiceById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const service = await ServiceService.getServiceById(parseInt(req.params.id));
+    const service = await ServiceService.getServiceById(parseInt(req.params.id as string));
     res.json(service);
   } catch (error: any) {
     if (error.message === 'SERVICE_NOT_FOUND') {
@@ -33,7 +33,7 @@ const createService = async (req: Request, res: Response, next: NextFunction) =>
 
 const updateService = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const service = await ServiceService.updateService(parseInt(req.params.id), req.body);
+    const service = await ServiceService.updateService(parseInt(req.params.id as string), req.body);
     res.json(service);
   } catch (error) {
     next(error);
@@ -42,7 +42,7 @@ const updateService = async (req: Request, res: Response, next: NextFunction) =>
 
 const deleteService = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await ServiceService.deleteService(parseInt(req.params.id));
+    await ServiceService.deleteService(parseInt(req.params.id as string));
     res.status(204).send();
   } catch (error) {
     next(error);

@@ -27,7 +27,7 @@ const getMyBookings = async (req: Request, res: Response, next: NextFunction) =>
 
 const cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const booking = await BookingService.cancelBooking(parseInt(req.params.id), req.user!.id);
+    const booking = await BookingService.cancelBooking(parseInt(req.params.id as string), req.user!.id);
     res.json(booking);
   } catch (error: any) {
     if (error.message === 'BOOKING_NOT_FOUND') {
@@ -54,7 +54,7 @@ const getAllBookings = async (req: Request, res: Response, next: NextFunction) =
 
 const updateBookingStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const booking = await BookingService.updateBookingStatus(parseInt(req.params.id), req.body.status);
+    const booking = await BookingService.updateBookingStatus(parseInt(req.params.id as string), req.body.status);
     res.json(booking);
   } catch (error) {
     next(error);

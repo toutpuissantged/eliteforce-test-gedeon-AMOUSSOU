@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, query } from 'express-validator';
 import {
-  getServices,
+  getAllServices,
   getServiceById,
   createService,
   updateService,
@@ -23,7 +23,7 @@ router.get(
     query('rating').optional().isNumeric(),
   ],
   validateRequest,
-  getServices
+  getAllServices
 );
 
 router.get('/:id', getServiceById);
