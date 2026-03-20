@@ -176,8 +176,13 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
                     <Text style={styles.sectionTitle}>Date prévue</Text>
                     <View style={styles.dateBox}>
-                        <CalendarTick size={24} color={theme.colors.primary} variant="Outline" />
-                        <Text style={styles.dateText}>{new Date(scheduledAt).toLocaleString('fr-FR')}</Text>
+                        <View style={styles.dateIconBg}>
+                            <CalendarTick size={22} color={theme.colors.primary} variant="Outline" />
+                        </View>
+                        <View style={styles.dateInfo}>
+                            <Text style={styles.dateLabel}>Intervention prévue le</Text>
+                            <Text style={styles.dateValue}>{new Date(scheduledAt).toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+                        </View>
                     </View>
                 </View>
 
@@ -198,7 +203,13 @@ const ServiceDetailScreen: React.FC<Props> = ({ route, navigation }) => {
                     {bookingLoading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.bookBtnText}>Réserver maintenant</Text>
+                        <Text 
+                            style={styles.bookBtnText} 
+                            numberOfLines={1} 
+                            adjustsFontSizeToFit
+                        >
+                            Réserver maintenant
+                        </Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -325,14 +336,50 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         marginBottom: 24,
     },
+    dateBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    dateIconBg: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    dateInfo: {
+        marginLeft: 16,
+        flex: 1,
+    },
+    dateLabel: {
+        fontSize: 11,
+        color: theme.colors.text.secondary,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    dateValue: {
+        fontSize: 14,
+        color: theme.colors.text.primary,
+        fontWeight: '700',
+        marginTop: 2,
+    },
     footer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
         backgroundColor: '#FFFFFF',
-        padding: 24,
-        paddingBottom: 40,
+        padding: 20,
+        paddingBottom: Platform.OS === 'ios' ? 34 : 20,
         flexDirection: 'row',
         alignItems: 'center',
         borderTopWidth: 1,
@@ -342,31 +389,32 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     totalLabel: {
-        fontSize: 14,
+        fontSize: 12,
         color: theme.colors.text.secondary,
-        marginBottom: 2,
+        fontWeight: '600',
     },
     totalPrice: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '800',
         color: theme.colors.text.primary,
     },
     bookBtn: {
         backgroundColor: theme.colors.primary,
-        paddingHorizontal: 32,
-        height: 60,
-        borderRadius: 20,
+        paddingHorizontal: 16,
+        height: 56,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        flex: 1.5,
+        flex: 2,
     },
     btnDisabled: {
         opacity: 0.6,
     },
     bookBtnText: {
         color: '#FFFFFF',
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '700',
+        textAlign: 'center',
     },
 });
 
